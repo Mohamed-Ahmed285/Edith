@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EDITH Assistant</title>
+    <link
+      rel="stylesheet"
+      href="style.css"
+    />
+  </head>
+  <body>
+    <div class="chat-container">
+      <header class="chat-header">
+        <h1>E.D.I.T.H.</h1>
+        <p>Mido's AI Assistant</p>
+      </header>
+
+      <div id="chat-box" class="chat-box"></div>
+
+      <div class="chat-input">
+        <input
+          type="text"
+          id="user-input"
+          placeholder="Talk to EDITH..."
+          autofocus
+        />
+        <button class="send-btn" onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+
+    <script>
+    const input = document.getElementById("user-input");
+    input.addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        sendMessage()
+      }
+    });
+      async function sendMessage() {
+        const input = document.getElementById("user-input");
+        const message = input.value.trim();
+        if (!message) return;
+
+        // Show user message
+        addMessage("user", message);
+        input.value = "";
+
+        // Send to Flask backend
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message }),
+        });
+
+        const data = await response.json();
+        addMessage("edith", data.reply);
+      }
+
+      function addMessage(sender, text) {
+        const chatBox = document.getElementById("chat-box");
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${sender}`;
+        messageDiv.innerHTML = `<p>${text}</p>`;
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    </script>
+  </body>
+</html>
